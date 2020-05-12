@@ -43,7 +43,7 @@ function App () {
 
   return (
     <div className='container'>
-      <CommentInput addComment={addComment} />
+      <CommentInput />
       <CommentsList comments={comments} />
     </div>
   )

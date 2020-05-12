@@ -1,31 +1,6 @@
 import React, { useState } from 'react'
-import useSWR, { mutate } from 'swr' // remote data lib
-import Axios from 'axios'
+import { addComment, useCommentsState } from './store'
 import './App.css'
-
-const http = Axios.create({
-  baseURL: 'http://localhost:3000'
-})
-
-async function getComments () {
-  const res = await http.get('/comments')
-  return res.data.comments
-}
-
-async function createComment (comment) {
-  const res = await http.post('/comments', { comment })
-  return res.data
-}
-
-async function addComment (comment) {
-  const newComment = await createComment(comment)
-  mutate('/comments', (comments) => [...comments, newComment])
-}
-
-function useCommentsState () {
-  const { data: comments, error } = useSWR('/comments', getComments)
-  return { comments, error }
-}
 
 function CommentsList (props) {
   const { comments } = props
@@ -44,7 +19,6 @@ function CommentsList (props) {
 
 function CommentInput (props) {
   const [newComment, setNewComment] = useState('')
-  const { addComment } = props
 
   return (
     <>

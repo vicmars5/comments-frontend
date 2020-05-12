@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import useSWR from 'swr' // remote data lib
+import React, { useState } from 'react'
+import useSWR, { mutate } from 'swr' // remote data lib
 import Axios from 'axios'
 import './App.css'
 
@@ -17,16 +17,14 @@ async function createComment (comment) {
   return res.data
 }
 
+async function addComment (comment) {
+  const newComment = await createComment(comment)
+  mutate('/comments', (comments) => [...comments, newComment])
+}
+
 function useCommentsState () {
-  const { data: comments, error, mutate } = useSWR('/comments', getComments)
-
-  async function addComment (comment) {
-    mutate(async (comments) => {
-      return [...comments, await createComment(comment)]
-    })
-  }
-
-  return { comments, error, addComment }
+  const { data: comments, error } = useSWR('/comments', getComments)
+  return { comments, error }
 }
 
 function CommentsList (props) {
@@ -61,7 +59,7 @@ function CommentInput (props) {
 }
 
 function App () {
-  const { comments, error, addComment } = useCommentsState()
+  const { comments, error } = useCommentsState()
 
   if (error) {
     return <div>Something failed. Please see console for more info</div>

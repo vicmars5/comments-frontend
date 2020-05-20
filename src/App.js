@@ -1,61 +1,52 @@
-import React, { Component } from 'react';
-import Axios from 'axios';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react'
+import { addComment, useCommentsState } from './store'
+import './App.css'
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      newComment: '',
-      comments: [{ id: 1, comment: 'Foo' }],
-    }
-  }
+function CommentsList (props) {
+  const { comments } = props
 
-  componentDidMount () {
-    Axios.get('http://localhost:3000/comments')
-      .then((res) => {
-        const { data: { comments } } = res;
-        this.setState({ comments });
-      })
-      .catch(err => console.error);
-  }
-
-  onClickBtn = async () => {
-    const { newComment } = this.state;
-    const { data: comment } = await Axios.post('http://localhost:3000/comments', {
-      comment: newComment
-    });
-    this.setState((state) => ({
-      comments: [...state.comments, comment]
-    }))
-  }
-
-  onChangeNewComment = (ev) => {
-    this.setState({ newComment: ev.target.value })
-  }
-
-  render () {
-    const { comments } = this.state
-    return (
-      <div className="container">
-        <input
-          type="text"
-          value={this.state.newComment}
-          onChange={this.onChangeNewComment}
-        />
-        <button onClick={this.onClickBtn}>Comment</button>
-        {comments.map(({ id, comment, votes }) => (
-          <div className="card" key={id}>
-            <div>
-              {comment}
-            </div>
-            <small>{votes}</small>
-          </div>
-        ))}
+  return (
+    comments.map(({ id, comment, votes }) => (
+      <div className='card' key={id}>
+        <div>
+          {comment}
+        </div>
+        <small>{votes}</small>
       </div>
-    );
-  }
+    ))
+  )
 }
 
-export default App;
+function CommentInput (props) {
+  const [newComment, setNewComment] = useState('')
+
+  return (
+    <>
+      <input
+        type='text'
+        value={newComment}
+        onChange={(ev) => setNewComment(ev.target.value)}
+      />
+      <button onClick={() => addComment(newComment)}>Comment</button>
+    </>
+  )
+}
+
+function App () {
+  const { comments, error } = useCommentsState()
+
+  if (error) {
+    return <div>Something failed. Please see console for more info</div>
+  }
+
+  if (!comments) return <div>Requesting comments...</div>
+
+  return (
+    <div className='container'>
+      <CommentInput />
+      <CommentsList comments={comments} />
+    </div>
+  )
+}
+
+export default App
